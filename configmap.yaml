@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: my-app-index
+  name: my-app-config
 data:
   index.html: |
     <!doctype html>
