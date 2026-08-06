@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cluster-rbac-demo
+spec:
+  serviceAccountName: cluster-reader-sa
+  containers:
+    - name: curl
+      image: curlimages/curl:latest
+      resources:
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
+        requests:
+          memory: "32Mi"
+          cpu: "100m"
+      command:
+        - sh
+        - -c
+        - |
+          TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+          CACERT=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+
+          echo "==== list pods across all namespaces ===="
+          curl --silent --fail --cacert "$CACERT" \
+            -H "Authorization: Bearer $TOKEN" \
+            https://kubernetes.default.svc/api/v1/pods | grep -o '"name":[^,}]*'
+
+          echo
+          echo "==== try delete pod in default namespace (should be forbidden) ===="
+          curl --silent --fail --cacert "$CACERT" \
+            -H "Authorization: Bearer $TOKEN" \
+            -X DELETE \
+            https://kubernetes.default.svc/api/v1/namespaces/default/pods/cluster-rbac-demo || echo "FORBIDDEN (as expected)"
+
+          echo
+          sleep 3600
