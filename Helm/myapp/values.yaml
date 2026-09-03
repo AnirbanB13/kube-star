@@ -1,0 +1,11 @@
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: 1.31.5-alpine-perl
+
+service:
+  type: ClusterIP
+  port: 80
+
+namespace: helm
